@@ -8,17 +8,6 @@ $("#room_bg").click(function (e) {
     console.log("x: " + relativePosition.left + " y: " + relativePosition.top);
 });
 
-const reduceArr = (arr, key) =>
-    arr.reduce((acc, val) => {
-        const found = acc.find((a) => a[key] === val[key]);
-        if (!found) {
-            acc.push({ [key]: val[key], data: [val] });
-        } else {
-            found.data.push(val);
-        }
-        return acc;
-    }, []);
-
 $(document).ready(function () {
     let roomID;
     const windowID = generateUniqueId().slice(0, 10);
@@ -502,17 +491,25 @@ $(document).ready(function () {
         }
     })();
 
-    // 確定都有拿到資料
-    const init = () => {
-        let message = [];
-        let question = [];
-        let currentMsgOwner = -1;
-        let currentMsgIndex = -1;
-        console.log("init");
+    // 所有的對話
+    let message = [];
+    // 所有的 QA
+    let question = [];
+    // 目前的人物
+    let currentMsgOwner = -1;
+    // 目前這個文案是第幾筆
+    let currentMsgIndex = -1;
+    // 目前最後一句，在 message 中的 id
+    let maxMsgIndex = -1;
 
-        const clientHeight = document.getElementById("room_bg").clientHeight;
-        const bgRatio = clientHeight / 600;
-        console.log(clientHeight, bgRatio);
+    const clientHeight = document.getElementById("room_bg").clientHeight;
+    const bgRatio = clientHeight / 600;
+
+
+    // 初始化房間
+    const init = () => {
+
+        console.log("init");
 
         const fetchRoomMsgStatus = () => {
             return new Promise((resolve, reject) => {
@@ -529,15 +526,14 @@ $(document).ready(function () {
                                 ? JSON.parse(msgData)
                                 : null;
 
-                        console.log("message", messageData);
-
                         // 創建時沒有內容，會是 null ，因此會報錯
                         if (messageData != null) {
-                            messageData.forEach((msg) => {
-                                message.push(msg);
+                            messageData.forEach((msg, i) => {
+                                message.push({ id: i, ...msg });
                             });
-                            message = messageData;
                         }
+
+                        console.log("message", message);
 
                         console.log("載入對話成功");
                         resolve(true);
@@ -577,268 +573,353 @@ $(document).ready(function () {
                 });
             });
         };
-
-        const playSound = (type) => {
-            let sound;
-            switch (type) {
-                case "bell":
-                    sound = new Audio("../../sound/bell.mp3");
-                    break;
-                case "correct":
-                    sound = new Audio("../../sound/correct.mp3");
-                    break;
-                case "incorrect":
-                    sound = new Audio("../../sound/incorrect.mp3");
-                    break;
-            }
-
-            sound.play();
-        };
         (async function () {
             try {
                 let getMsgDone = await fetchRoomMsgStatus();
                 let getQuestionDone = await fetchRoomQuestionStatus();
 
                 if (getMsgDone && getQuestionDone) {
-                    closeLoading();
+                    start();
 
-                    const memberHasMsg = reduceArr(message, "who");
-                    console.log("memberHasMsg", memberHasMsg);
-
-                    // show members's pill who have msg
-                    memberHasMsg.map((msgItem) => {
-                        $("#room_bg").append(
-                            generatePillMsg({
-                                id: msgItem.who,
-                                name: member[msgItem.who - 1].name,
-                                x: member[msgItem.who - 1].x * bgRatio,
-                                y: member[msgItem.who - 1].y * bgRatio,
-                                total: msgItem.data.length,
-                                current: 1,
-                            })
-                        );
-                    });
-
-                    // update room member quantity
-                    $("#roomMemberQuantity").text(memberHasMsg.length);
-
-                    // 點擊人物名稱
-                    $(".pill").on("click", function () {
-                        currentMsgOwner = Number($(this).attr("personID"));
-                        currentMsgIndex = Number($(this).attr("current"));
-                        updateDialog();
-                    });
-
-                    function updateDialog() {
-                        $("#dialog").addClass("active");
-                        const totalMsg = memberHasMsg.filter(
-                            (item) => item.who === `${currentMsgOwner}`
-                        )[0].data;
-                        const currentMsg = totalMsg[currentMsgIndex - 1];
-                        const name = member.filter((item) => item.id === Number(currentMsg.who))[0]
-                            .name;
-                        
-                        // 更新 pill current
-                        $(`button.pill[personID="${currentMsgOwner}"]`).attr('current',currentMsgIndex);
-
-                        // 名字
-                        $("#dialog .name").text(name);
-
-                        // 目前
-                        $("#dialog #current").text(currentMsgIndex);
-
-                        // 總共
-                        $("#dialog #total").text(totalMsg.length);
-
-                        // 鈴聲
-                        playSound("bell");
-
-                        // 內文
-                        $("#dialog .text").text("");
-                        $("#dialog .text").children().remove();
-                        if (currentMsg.type === "text") {
-                            $("#dialog .text").text(currentMsg.text);
-                        }
-
-                        if (currentMsg.type === "link") {
-                            let link = document.createElement("a");
-                            link.classList.add("link");
-                            link.setAttribute("target", "_blank");
-                            link.setAttribute("href", currentMsg.text);
-                            link.textContent = currentMsg.text;
-                            $("#dialog .text").append(link);
-                        }
-
-                        if (currentMsg.type === "image") {
-                            let image = `<div class="image"><img src="${currentMsg.imageSRC}" /></div>`;
-                            $("#dialog .text").append(image);
-
-                            $("#dialog .image").on("click", function () {
-                                openModal({
-                                    targetModal: $("#quickView"),
-                                });
-
-                                $("#quickView .content .middle img").attr(
-                                    "src",
-                                    $(this).find("img").attr("src")
-                                );
-                            });
-                        }
-
-                        // 處理箭頭顯示與否
-                        if (currentMsgIndex === totalMsg.length) {
-                            $("#triggerMsgNext").addClass("hide")
-                        } else {
-                            $("#triggerMsgNext").removeClass("hide");
-                        }
-
-                        if (currentMsgIndex === 1) {
-                            $("#triggerMsgPrev").addClass("hide");
-                        } else {
-                            $("#triggerMsgPrev").removeClass("hide");
-                        }
-                    }
-
-                    // 往前
-                    $("#triggerMsgPrev").on("click", function () {
-                        if (currentMsgIndex > 1) {
-                            currentMsgIndex--;
-                        }
-
-                        updateDialog();
-                    });
-
-                    // 往前
-                    $("#triggerMsgNext").on("click", function () {
-                        const totalMsg = memberHasMsg.filter(
-                            (item) => item.who === `${currentMsgOwner}`
-                        )[0].data;
-                        if (currentMsgIndex < totalMsg.length) {
-                            currentMsgIndex++;
-                        }
-
-                        updateDialog();
-                    });
-
-                    $("#quickView").on("click", function (e) {
-                        let close = true;
-                        if (e.target == document.getElementById("quickView")) {
-                            closeModal();
-                        }
-                    });
-
-
-                    // 第一個對話
-                    const firstMsg = message[0];
-                    $(`button.pill[personID="${firstMsg.who}"]`).click();
-
-                    // 題目
-                    let answer = [];
-
-                    if (question != null) {
-                        question.map((item, index) => {
-                            $("#question").append(
-                                generateQuestionItem({
-                                    questionData: item.options, // ['選項一','選項二'...]
-                                    questionIndex: item.indexName ? item.indexName : index + 1, // 題號
-                                })
-                            );
-                            answer.push(item.answerID);
-                        });
-                        activeQuestionItemFunction();
-                    }
-
-                    $("#questionBtn").on("click", function () {
-                        $(".room_question").addClass("active");
-                    });
-                    $("#closeQA").on("click", function () {
-                        $(".room_question").removeClass("active");
-                    });
-
-                    $("#submitAnswer").click(() => {
-                        let userAnswer = getAnswer();
-
-                        if (userAnswer.length == answer.length) {
-                            let valid = checkAnswer(userAnswer, answer);
-                            dataLayer.push({
-                                event: "submitAnswer",
-                                roomID: roomID,
-                                windowID: windowID,
-                            });
-
-                            if (valid) {
-                                $(".congrats").addClass("active");
-                                playSound("correct");
-                                dataLayer.push({
-                                    event: "correct",
-                                    roomID: roomID,
-                                    windowID: windowID,
-                                });
-                            } else {
-                                $(".congrats").removeClass("active");
-
-                                showErrorMsg({
-                                    target: $(".room_question"),
-                                    msg: "再檢查一下吧ＱＱ",
-                                });
-                                playSound("incorrect");
-                                dataLayer.push({
-                                    event: "incorrect",
-                                    roomID: roomID,
-                                    windowID: windowID,
-                                    answer: userAnswer,
-                                });
-                            }
-                        } else {
-                            showErrorMsg({
-                                target: $(".room_question"),
-                                msg: "有未作答的題目",
-                            });
-                            playSound("incorrect");
-
-                            dataLayer.push({
-                                event: "notAllFill",
-                                roomID: roomID,
-                                windowID: windowID,
-                            });
-                        }
-                    });
-
-                    // 拿到使用者填答
-                    function getAnswer() {
-                        let userAnswer = [];
-                        for (let i = 0; i < $(".answerOption").length; i++) {
-                            let selected = $(".answerOption").eq(i).attr("select-id");
-                            if (selected != "") {
-                                userAnswer.push(selected);
-                            }
-                        }
-                        return userAnswer;
-                    }
-
-                    // 檢查答案是否相同
-                    function checkAnswer(userAnswer, answer) {
-                        let valid = true;
-                        for (let i = 0; i < answer.length; i++) {
-                            if (userAnswer[i] != answer[i]) {
-                                valid = false;
-                                $("#question .questionItem")
-                                    .eq(i)
-                                    .find("input")
-                                    .addClass("alert");
-                            } else {
-                                $("#question .questionItem")
-                                    .eq(i)
-                                    .find("input")
-                                    .removeClass("alert");
-                            }
-                        }
-                        return valid;
-                    }
                 }
             } catch (err) {
                 console.log(err);
             }
         })();
+    };
+
+    // 開始
+    const start = () => {
+        startMap();
+        closeLoading();
+
+        startQA();
+    }
+
+    const startMap = () => {
+        let memberIdList = [];
+        let lastCheckId = -1;
+        // 文案照順序，如果下一句是同一個人就分一群
+        let msgGroupByRepeat = [];
+        // 目前是 msgGroupByRepeat 的哪一群
+        let group = 0;
+
+        for (let i = 0; i < message.length; i++) {
+            let currentMemberId = Number(message[i].who);
+
+            // 是否跟前一個一樣
+            if (lastCheckId === currentMemberId) {
+                msgGroupByRepeat[msgGroupByRepeat.length - 1].repeat++;
+            } else {
+                // 如果沒出現過，就加入名單
+                if (!memberIdList.includes(currentMemberId)) {
+                    memberIdList.push(currentMemberId);
+                }
+
+                msgGroupByRepeat.push({ who: currentMemberId, repeat: 1, msgId: i });
+                lastCheckId = currentMemberId;
+            }
+        }
+
+        console.log("msgGroupByRepeat", msgGroupByRepeat, memberIdList);
+
+        // show members's pill who have msg
+        memberIdList.map((msgId) => {
+            $("#room_bg").append(
+                generatePillMsg({
+                    id: msgId,
+                    name: member[msgId - 1].name,
+                    x: member[msgId - 1].x * bgRatio,
+                    y: member[msgId - 1].y * bgRatio,
+                    total: 1, // tmp
+                    current: 1,
+                })
+            );
+        });
+
+        // update room member quantity
+        $("#roomMemberQuantity").text(memberIdList.length);
+
+        // 點擊人物名稱
+        $(".pill").on("click", function () {
+            currentMsgOwner = Number($(this).attr("personID"));
+            currentMsgIndex = Number($(this).attr("current"));
+
+            updateDialog();
+        });
+
+        function updateDialog() {
+            $("#dialog").addClass("active");
+            const totalMsg = message.filter(
+                (item) =>
+                    item.who === `${currentMsgOwner}` &&
+                    item.id <= maxMsgIndex
+            );
+            // 根據目前互動的結果，此人物最多能顯示文案 = message 中 id <= maxMsgIndex 且 屬於 目前人物的總文案數
+            const currentMsgOwnerTotal = totalMsg.length;
+
+            // 如果沒有內容，可能是目前還沒到該人物
+            if (currentMsgOwnerTotal == 0) {
+                // 名字
+                $("#dialog .name").text(member[currentMsgOwner - 1].name);
+
+                // 目前
+                $("#dialog #current").text(1);
+
+                // 總共
+                $("#dialog #total").text(1);
+
+                // 處理箭頭
+                $("#triggerMsgNext").addClass("hide");
+                $("#triggerMsgPrev").addClass("hide");
+
+                // 鈴聲
+                playSound("bell");
+
+                // 內文
+                $("#dialog .text").text("晚點再來找我吧");
+            } else {
+
+                const currentMsg = totalMsg[currentMsgIndex - 1];
+                const currentMsgId = currentMsg.id;
+
+                // 如果現在的文案 id = 該次的最後一句，也就是 msgGroupByRepeat 的 msgId + repeat -1
+                if (currentMsgId === msgGroupByRepeat[group].msgId + msgGroupByRepeat[group].repeat - 1) {
+
+                    if (group !== msgGroupByRepeat.length - 1) {
+                        maxMsgIndex = currentMsgId + msgGroupByRepeat[group + 1].repeat;
+                        group++;
+                    } else {
+
+                        setTimeout(() => {
+                            alert('已看完所有對話，快去作答區挑戰看看吧!');
+                        }, 2000);
+
+                    }
+
+                }
+
+                const name = member.filter(
+                    (item) => item.id === Number(currentMsg.who)
+                )[0].name;
+
+                // 更新 pill current
+                $(`button.pill[personID="${currentMsgOwner}"]`).attr(
+                    "current",
+                    currentMsgIndex
+                );
+
+                // 名字
+                $("#dialog .name").text(name);
+
+                // 目前
+                $("#dialog #current").text(currentMsgIndex);
+
+                // 總共
+                $("#dialog #total").text(totalMsg.length);
+
+                // 鈴聲
+                playSound("bell");
+
+                // 內文
+                $("#dialog .text").text("");
+                $("#dialog .text").children().remove();
+                if (currentMsg.type === "text") {
+                    $("#dialog .text").text(currentMsg.text);
+                }
+
+                if (currentMsg.type === "link") {
+                    let link = document.createElement("a");
+                    link.classList.add("link");
+                    link.setAttribute("target", "_blank");
+                    link.setAttribute("href", currentMsg.text);
+                    link.textContent = currentMsg.text;
+                    $("#dialog .text").append(link);
+                }
+
+                if (currentMsg.type === "image") {
+                    let image = `<div class="image"><img src="${currentMsg.imageSRC}" /></div>`;
+                    $("#dialog .text").append(image);
+
+                    $("#dialog .image").on("click", function () {
+                        openModal({
+                            targetModal: $("#quickView"),
+                        });
+
+                        $("#quickView .content .middle img").attr(
+                            "src",
+                            $(this).find("img").attr("src")
+                        );
+                    });
+                }
+
+                // 處理箭頭顯示與否
+                if (Number($("#dialog #current").text()) === Number($("#dialog #total").text())) {
+                    $("#triggerMsgNext").addClass("hide");
+                } else {
+                    $("#triggerMsgNext").removeClass("hide");
+                }
+
+                if (Number($("#dialog #current").text()) === 1) {
+                    $("#triggerMsgPrev").addClass("hide");
+                } else {
+                    $("#triggerMsgPrev").removeClass("hide");
+                }
+            }
+
+        }
+
+        // 往前
+        $("#triggerMsgPrev").on("click", function () {
+            if (currentMsgIndex > 1) {
+                currentMsgIndex--;
+            }
+
+            updateDialog();
+        });
+
+        // 往前
+        $("#triggerMsgNext").on("click", function () {
+            if (currentMsgIndex < Number($("#dialog #total").text())) {
+                currentMsgIndex++;
+            }
+
+            updateDialog();
+        });
+
+        $("#quickView").on("click", function (e) {
+            let close = true;
+            if (e.target == document.getElementById("quickView")) {
+                closeModal();
+            }
+        });
+
+        // 第一個對話
+        const firstMsg = message[0];
+        maxMsgIndex = msgGroupByRepeat[0].repeat - 1;
+        $(`button.pill[personID="${firstMsg.who}"]`).click();
+    }
+
+    const startQA = () => {
+        // 題目
+        let answer = [];
+
+        if (question != null) {
+            question.map((item, index) => {
+                $("#question").append(
+                    generateQuestionItem({
+                        questionData: item.options, // ['選項一','選項二'...]
+                        questionIndex: item.indexName ? item.indexName : index + 1, // 題號
+                    })
+                );
+                answer.push(item.answerID);
+            });
+            activeQuestionItemFunction();
+        }
+
+        $("#questionBtn").on("click", function () {
+            $(".room_question").addClass("active");
+        });
+        $("#closeQA").on("click", function () {
+            $(".room_question").removeClass("active");
+        });
+
+        $("#submitAnswer").click(() => {
+            let userAnswer = getAnswer();
+
+            if (userAnswer.length == answer.length) {
+                let valid = checkAnswer(userAnswer, answer);
+                dataLayer.push({
+                    event: "submitAnswer",
+                    roomID: roomID,
+                    windowID: windowID,
+                });
+
+                if (valid) {
+                    $(".congrats").addClass("active");
+                    playSound("correct");
+                    dataLayer.push({
+                        event: "correct",
+                        roomID: roomID,
+                        windowID: windowID,
+                    });
+                } else {
+                    $(".congrats").removeClass("active");
+
+                    showErrorMsg({
+                        target: $(".room_question"),
+                        msg: "再檢查一下吧ＱＱ",
+                    });
+                    playSound("incorrect");
+                    dataLayer.push({
+                        event: "incorrect",
+                        roomID: roomID,
+                        windowID: windowID,
+                        answer: userAnswer,
+                    });
+                }
+            } else {
+                showErrorMsg({
+                    target: $(".room_question"),
+                    msg: "有未作答的題目",
+                });
+                playSound("incorrect");
+
+                dataLayer.push({
+                    event: "notAllFill",
+                    roomID: roomID,
+                    windowID: windowID,
+                });
+            }
+        });
+
+        // 拿到使用者填答
+        function getAnswer() {
+            let userAnswer = [];
+            for (let i = 0; i < $(".answerOption").length; i++) {
+                let selected = $(".answerOption").eq(i).attr("select-id");
+                if (selected != "") {
+                    userAnswer.push(selected);
+                }
+            }
+            return userAnswer;
+        }
+
+        // 檢查答案是否相同
+        function checkAnswer(userAnswer, answer) {
+            let valid = true;
+            for (let i = 0; i < answer.length; i++) {
+                if (userAnswer[i] != answer[i]) {
+                    valid = false;
+                    $("#question .questionItem")
+                        .eq(i)
+                        .find("input")
+                        .addClass("alert");
+                } else {
+                    $("#question .questionItem")
+                        .eq(i)
+                        .find("input")
+                        .removeClass("alert");
+                }
+            }
+            return valid;
+        }
+    }
+
+    const playSound = (type) => {
+        let sound;
+        switch (type) {
+            case "bell":
+                sound = new Audio("../../sound/bell.mp3");
+                break;
+            case "correct":
+                sound = new Audio("../../sound/correct.mp3");
+                break;
+            case "incorrect":
+                sound = new Audio("../../sound/incorrect.mp3");
+                break;
+        }
+
+        sound.play();
     };
 });

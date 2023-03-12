@@ -46,7 +46,7 @@ include "../../pdoInc.php";
     <!-- Google Tag Manager (noscript) -->
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-K7S8TL9" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
-    <!-- <div id="loaderWrapper" class="active" type="init">
+    <div id="loaderWrapper" class="active" type="init">
         <div class="loader"></div>
         <div class="text init">
             初始化中，請稍等
@@ -60,7 +60,7 @@ include "../../pdoInc.php";
         <div class="text fail">
             儲存失敗
         </div>
-    </div> -->
+    </div>
     <div class="room_header">
         <div class="room_name"><?php echo $_SESSION['roomName']; ?>（<span id="roomMemberQuantity"></span>）</div>
     </div>
