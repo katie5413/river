@@ -501,6 +501,9 @@ $(document).ready(function () {
     let currentMsgIndex = -1;
     // 目前最後一句，在 message 中的 id
     let maxMsgIndex = -1;
+    // 提交時
+    const startTime = new Date();
+    let submittedTimes = 0; // 提交次數
 
     const clientHeight = document.getElementById("room_bg").clientHeight;
     const bgRatio = clientHeight / 600;
@@ -577,9 +580,11 @@ $(document).ready(function () {
             try {
                 let getMsgDone = await fetchRoomMsgStatus();
                 let getQuestionDone = await fetchRoomQuestionStatus();
+                
 
                 if (getMsgDone && getQuestionDone) {
                     start();
+                    console.log('start:', startTime.toDateString());
 
                 }
             } catch (err) {
@@ -592,8 +597,44 @@ $(document).ready(function () {
     const start = () => {
         startMap();
         closeLoading();
+        
 
         startQA();
+    }
+
+    function showRecord() {
+        // 將兩個時間轉換成 JavaScript 的 Date 物件
+        const date1 = startTime;
+        const date2 = new Date();
+
+        // 取得兩個 Date 物件的時間戳記
+        const timestamp1 = date1.getTime();
+        const timestamp2 = date2.getTime();
+
+        const minutes = 60;
+        const hours = 60 * 24;
+
+        // 計算毫秒差
+        const diffSeconds = (Math.round((timestamp2 - timestamp1) / 1000) * 10) / 10;
+
+        const totalHours = Math.floor(diffSeconds / hours);
+        const formattedHours = totalHours > 9 ? totalHours : `0${totalHours}`;
+
+        const totalMinutes = Math.floor(diffSeconds / minutes);
+        const formattedMinutes = totalMinutes > 9 ? totalMinutes : `0${totalMinutes}`;
+        const totalSeconds = diffSeconds - minutes * totalMinutes;
+        const formattedSeconds = totalSeconds > 9 ? totalSeconds : `0${totalSeconds}`;
+
+        const formattedTime =
+            totalHours === 0
+                ? `${formattedMinutes}:${formattedSeconds}`
+                : `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+
+        const name = $('#submitName').val();
+        $('.congrats .text span').text(name);
+        $('.congrats .time span').text(formattedTime);
+        $('.congrats .submitTimes span').text(submittedTimes);
+        $('#submitAnswer').hide();
     }
 
     const startMap = () => {
@@ -826,6 +867,9 @@ $(document).ready(function () {
 
         $("#submitAnswer").click(() => {
             let userAnswer = getAnswer();
+            
+            // 累積提交次數
+            submittedTimes++;
 
             if (userAnswer.length == answer.length) {
                 let valid = checkAnswer(userAnswer, answer);
@@ -843,6 +887,8 @@ $(document).ready(function () {
                         roomID: roomID,
                         windowID: windowID,
                     });
+                    showRecord();
+
                 } else {
                     $(".congrats").removeClass("active");
 

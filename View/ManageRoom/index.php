@@ -54,6 +54,9 @@ include "../../pdoInc.php";
         <div class="text init">
             初始化中，請稍等
         </div>
+        <div class="text success">
+            儲存成功
+        </div>
     </div>
     <div class="bg">
 
@@ -72,6 +75,7 @@ include "../../pdoInc.php";
                 <button id="saveContent" class="button button-fill">儲存</button>
             </div>
         </div>
+        <p>註：圖片不可大於 800KB </p>
 
         <div class="manageContent">
             <h3 id="contentDisplayArea" class="toggleExpand">聊天室內容<span><img src="../../Images/icon/arrowRight.svg" alt="icon" class="icon"></span></h3>

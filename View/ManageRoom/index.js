@@ -447,7 +447,7 @@ $(document).ready(function () {
         },
     ];
 
-    
+
 
     let message = [];
     let question = [];
@@ -1105,11 +1105,12 @@ $(document).ready(function () {
                 let checkQuestion = await checkQuestionSave();
 
                 if (checkContent && checkQuestion) {
+
+                    alert('儲存成功');
+
                     activeLoading("success");
 
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1000);
+                    closeLoading();
                 }
             } catch (err) {
                 console.log(err);
