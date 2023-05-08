@@ -82,7 +82,7 @@ include "../../pdoInc.php";
                 </div>
             </div>
             <div class="btnArea">
-                <a class="entryBtn" type="button" href="../index.php">
+                <a class="entryBtn" type="button" href="../../index.php">
                     訪客
                 </a>
                 <button class="entryBtn" type="button">

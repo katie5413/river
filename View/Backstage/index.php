@@ -68,7 +68,7 @@ include "../../pdoInc.php";
             </div>
 
             <div class="btnArea">
-                <a class="entryBtn" type="button" href="../index.php">
+                <a class="entryBtn" type="button" href="../../index.php">
                     使用
                 </a>
                 <a class="entryBtn" type="button" href="../New/index.php">
