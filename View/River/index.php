@@ -73,6 +73,7 @@ include "../../pdoInc.php";
             <div class="text">文字</div>
         </div>
         <div class="bottom">
+            <div id="goFind"></div>
             <div class="control">
                 <img id="triggerMsgPrev" class="prev arrow" src="../../Images/icon/arrow-left.svg" alt="prev">
                 <div class="page">
@@ -82,7 +83,6 @@ include "../../pdoInc.php";
                 </div>
                 <img id="triggerMsgNext" class="next arrow" src="../../Images/icon/arrow-right.svg" alt="next">
             </div>
-            <div id="goFind"></div>
         </div>
     </div>
 
