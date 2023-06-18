@@ -508,10 +508,8 @@ $(document).ready(function () {
     const clientHeight = document.getElementById("room_bg").clientHeight;
     const bgRatio = clientHeight / 600;
 
-
     // 初始化房間
     const init = () => {
-
         console.log("init");
 
         const fetchRoomMsgStatus = () => {
@@ -580,12 +578,10 @@ $(document).ready(function () {
             try {
                 let getMsgDone = await fetchRoomMsgStatus();
                 let getQuestionDone = await fetchRoomQuestionStatus();
-                
 
                 if (getMsgDone && getQuestionDone) {
                     start();
-                    console.log('start:', startTime.toDateString());
-
+                    console.log("start:", startTime.toDateString());
                 }
             } catch (err) {
                 console.log(err);
@@ -597,10 +593,9 @@ $(document).ready(function () {
     const start = () => {
         startMap();
         closeLoading();
-        
 
         startQA();
-    }
+    };
 
     function showRecord() {
         // 將兩個時間轉換成 JavaScript 的 Date 物件
@@ -615,26 +610,29 @@ $(document).ready(function () {
         const hours = 60 * 24;
 
         // 計算毫秒差
-        const diffSeconds = (Math.round((timestamp2 - timestamp1) / 1000) * 10) / 10;
+        const diffSeconds =
+            (Math.round((timestamp2 - timestamp1) / 1000) * 10) / 10;
 
         const totalHours = Math.floor(diffSeconds / hours);
         const formattedHours = totalHours > 9 ? totalHours : `0${totalHours}`;
 
         const totalMinutes = Math.floor(diffSeconds / minutes);
-        const formattedMinutes = totalMinutes > 9 ? totalMinutes : `0${totalMinutes}`;
+        const formattedMinutes =
+            totalMinutes > 9 ? totalMinutes : `0${totalMinutes}`;
         const totalSeconds = diffSeconds - minutes * totalMinutes;
-        const formattedSeconds = totalSeconds > 9 ? totalSeconds : `0${totalSeconds}`;
+        const formattedSeconds =
+            totalSeconds > 9 ? totalSeconds : `0${totalSeconds}`;
 
         const formattedTime =
             totalHours === 0
                 ? `${formattedMinutes}:${formattedSeconds}`
                 : `${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
 
-        const name = $('#submitName').val();
-        $('.congrats .text span').text(name);
-        $('.congrats .time span').text(formattedTime);
-        $('.congrats .submitTimes span').text(submittedTimes);
-        $('#submitAnswer').hide();
+        const name = $("#submitName").val();
+        $(".congrats .text span").text(name);
+        $(".congrats .time span").text(formattedTime);
+        $(".congrats .submitTimes span").text(submittedTimes);
+        $("#submitAnswer").hide();
     }
 
     const startMap = () => {
@@ -692,9 +690,7 @@ $(document).ready(function () {
         function updateDialog() {
             $("#dialog").addClass("active");
             const totalMsg = message.filter(
-                (item) =>
-                    item.who === `${currentMsgOwner}` &&
-                    item.id <= maxMsgIndex
+                (item) => item.who === `${currentMsgOwner}` && item.id <= maxMsgIndex
             );
             // 根據目前互動的結果，此人物最多能顯示文案 = message 中 id <= maxMsgIndex 且 屬於 目前人物的總文案數
             const currentMsgOwnerTotal = totalMsg.length;
@@ -720,25 +716,8 @@ $(document).ready(function () {
                 // 內文
                 $("#dialog .text").text("晚點再來找我吧");
             } else {
-
                 const currentMsg = totalMsg[currentMsgIndex - 1];
                 const currentMsgId = currentMsg.id;
-
-                // 如果現在的文案 id = 該次的最後一句，也就是 msgGroupByRepeat 的 msgId + repeat -1
-                if (currentMsgId === msgGroupByRepeat[group].msgId + msgGroupByRepeat[group].repeat - 1) {
-
-                    if (group !== msgGroupByRepeat.length - 1) {
-                        maxMsgIndex = currentMsgId + msgGroupByRepeat[group + 1].repeat;
-                        group++;
-                    } else {
-
-                        setTimeout(() => {
-                            alert('已看完所有對話，快去作答區挑戰看看吧!');
-                        }, 2000);
-
-                    }
-
-                }
 
                 const name = member.filter(
                     (item) => item.id === Number(currentMsg.who)
@@ -795,7 +774,10 @@ $(document).ready(function () {
                 }
 
                 // 處理箭頭顯示與否
-                if (Number($("#dialog #current").text()) === Number($("#dialog #total").text())) {
+                if (
+                    Number($("#dialog #current").text()) ===
+                    Number($("#dialog #total").text())
+                ) {
                     $("#triggerMsgNext").addClass("hide");
                 } else {
                     $("#triggerMsgNext").removeClass("hide");
@@ -806,8 +788,38 @@ $(document).ready(function () {
                 } else {
                     $("#triggerMsgPrev").removeClass("hide");
                 }
-            }
 
+                $("#dialog #goFind").text("");
+
+                // 如果現在的文案 id = 該次的最後一句，也就是 msgGroupByRepeat 的 msgId + repeat -1
+                if (
+                    currentMsgId ===
+                    msgGroupByRepeat[group].msgId + msgGroupByRepeat[group].repeat - 1
+                ) {
+                    if (group !== msgGroupByRepeat.length - 1) {
+                        maxMsgIndex = currentMsgId + msgGroupByRepeat[group + 1].repeat;
+                        group++;
+
+                        // 在對話中新增下一個人是誰的提示
+                        $("#dialog #goFind").text(
+                            `去找${member.filter(
+                                (item) => item.id === Number(msgGroupByRepeat[group].who)
+                            )[0].name
+                            }吧！`
+                        );
+                        console.log(
+                            member.filter(
+                                (item) => item.id === Number(msgGroupByRepeat[group].who)
+                            )[0].name
+                        );
+                    } else {
+
+                        $("#dialog #goFind").text(
+                            `已看完所有對話，快去作答區挑戰看看吧!`
+                        );
+                    }
+                }
+            }
         }
 
         // 往前
@@ -839,7 +851,7 @@ $(document).ready(function () {
         const firstMsg = message[0];
         maxMsgIndex = msgGroupByRepeat[0].repeat - 1;
         $(`button.pill[personID="${firstMsg.who}"]`).click();
-    }
+    };
 
     const startQA = () => {
         // 題目
@@ -867,7 +879,7 @@ $(document).ready(function () {
 
         $("#submitAnswer").click(() => {
             let userAnswer = getAnswer();
-            
+
             // 累積提交次數
             submittedTimes++;
 
@@ -888,7 +900,6 @@ $(document).ready(function () {
                         windowID: windowID,
                     });
                     showRecord();
-
                 } else {
                     $(".congrats").removeClass("active");
 
@@ -937,20 +948,14 @@ $(document).ready(function () {
             for (let i = 0; i < answer.length; i++) {
                 if (userAnswer[i] != answer[i]) {
                     valid = false;
-                    $("#question .questionItem")
-                        .eq(i)
-                        .find("input")
-                        .addClass("alert");
+                    $("#question .questionItem").eq(i).find("input").addClass("alert");
                 } else {
-                    $("#question .questionItem")
-                        .eq(i)
-                        .find("input")
-                        .removeClass("alert");
+                    $("#question .questionItem").eq(i).find("input").removeClass("alert");
                 }
             }
             return valid;
         }
-    }
+    };
 
     const playSound = (type) => {
         let sound;

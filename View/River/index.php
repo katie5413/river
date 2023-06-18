@@ -69,6 +69,7 @@ include "../../pdoInc.php";
     <div id="dialog">
         <div class="top">
             <div class="name">name</div>
+            <div class="quote">:</div>
             <div class="text">文字</div>
         </div>
         <div class="bottom">
@@ -81,6 +82,7 @@ include "../../pdoInc.php";
                 </div>
                 <img id="triggerMsgNext" class="next arrow" src="../../Images/icon/arrow-right.svg" alt="next">
             </div>
+            <div id="goFind"></div>
         </div>
     </div>
 
