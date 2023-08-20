@@ -18,6 +18,7 @@ include "../../pdoInc.php";
     <link rel="stylesheet" type="text/css" href="../../Components/Notice/index.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" type="text/css" href="../../Components/Modal/index.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" type="text/css" href="../../Components/QuestionItem/index.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" type="text/css" href="../../Components/HistoryItem/index.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" type="text/css" href="../../Components/QuickView/index.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" type="text/css" href="../../Components/ErrorMsg/index.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" type="text/css" href="../../Components/Loading/index.css?v=<?php echo time(); ?>">
@@ -64,6 +65,10 @@ include "../../pdoInc.php";
     </div>
     <div class="room_header">
         <div class="room_name"><?php echo $_SESSION['roomName']; ?>（<span id="roomMemberQuantity"></span>）</div>
+        <div id="toggleBtn">
+            <img class="question icon" src="../../Images/icon/question.png" alt="question">
+            <img class="history icon active" src="../../Images/icon/history.png" alt="history">
+        </div>
     </div>
 
     <div id="dialog">
@@ -73,9 +78,8 @@ include "../../pdoInc.php";
             <div class="text">文字</div>
         </div>
         <div class="bottom">
-            <div id="goFind"></div>
             <div class="control">
-                <img id="triggerMsgPrev" class="prev arrow" src="../../Images/icon/arrow-left.svg" alt="prev">
+                <!-- <img id="triggerMsgPrev" class="prev arrow" src="../../Images/icon/arrow-left.svg" alt="prev"> -->
                 <div class="page">
                     <span id="current">1</span>
                     <span>/</span>
@@ -83,6 +87,7 @@ include "../../pdoInc.php";
                 </div>
                 <img id="triggerMsgNext" class="next arrow" src="../../Images/icon/arrow-right.svg" alt="next">
             </div>
+            <div id="goFind"></div>
         </div>
     </div>
 
@@ -99,13 +104,18 @@ include "../../pdoInc.php";
                 </div>
             </div>
         </div>
+
+    </div>
+    <div class="room_history">
+        <div class="wrapper">
+            <div class="blockTitle">歷史紀錄</div>
+            <div id="history"></div>
+        </div>
     </div>
 
-    <div class="room_question">
+    <div class="room_question active">
         <div class="wrapper">
-            <div class="blockTitle">作答區
-                <img id="closeQA" src="../../Images/icon/close.svg" alt="close">
-            </div>
+            <div class="blockTitle">作答區</div>
             <div class="form__input">
                 <input id="submitName" class="input" type="text" value="" placeholder="暱稱（選填）" />
             </div>
@@ -134,6 +144,7 @@ include "../../pdoInc.php";
     <script src="../../Components/Notice/index.js?v=<?php echo time(); ?>"></script>
     <script src="../../Components/Modal/index.js?v=<?php echo time(); ?>"></script>
     <script src="../../Components/QuestionItem/index.js?v=<?php echo time(); ?>"></script>
+    <script src="../../Components/HistoryItem/index.js?v=<?php echo time(); ?>"></script>
     <script src="../../Components/ErrorMsg/index.js?v=<?php echo time(); ?>"></script>
     <script src="../../Components/Loading/index.js?v=<?php echo time(); ?>"></script>
     <script src="index.js?v=<?php echo time(); ?>"></script>

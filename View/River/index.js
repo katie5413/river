@@ -5,7 +5,7 @@ $("#room_bg").click(function (e) {
         top: e.pageY - $("#room_bg").offset().top,
     };
 
-    console.log("x: " + relativePosition.left + " y: " + relativePosition.top);
+    // console.log("x: " + relativePosition.left + " y: " + relativePosition.top);
 });
 
 $(document).ready(function () {
@@ -597,6 +597,13 @@ $(document).ready(function () {
         startQA();
     };
 
+    const groupBy = function (xs, key) {
+        return xs.reduce(function (rv, x) {
+            (rv[x[key]] = rv[x[key]] || []).push(x);
+            return rv;
+        }, {});
+    };
+
     function showRecord() {
         // 將兩個時間轉換成 JavaScript 的 Date 物件
         const date1 = startTime;
@@ -642,6 +649,8 @@ $(document).ready(function () {
         let msgGroupByRepeat = [];
         // 目前是 msgGroupByRepeat 的哪一群
         let group = 0;
+        // 判斷每個人的總句數
+        const msgGroupByWho = groupBy(message, 'who')
 
         for (let i = 0; i < message.length; i++) {
             let currentMemberId = Number(message[i].who);
@@ -708,7 +717,7 @@ $(document).ready(function () {
 
                 // 處理箭頭
                 $("#triggerMsgNext").addClass("hide");
-                $("#triggerMsgPrev").addClass("hide");
+                // $("#triggerMsgPrev").addClass("hide");
 
                 // 鈴聲
                 playSound("bell");
@@ -716,26 +725,30 @@ $(document).ready(function () {
                 // 內文
                 $("#dialog .text").text("晚點再來找我吧");
             } else {
-                const currentMsg = totalMsg[currentMsgIndex - 1];
+                let currentMsg = totalMsg[currentMsgIndex - 1];
                 const currentMsgId = currentMsg.id;
 
                 const name = member.filter(
                     (item) => item.id === Number(currentMsg.who)
                 )[0].name;
 
+                // 名字
+                $("#dialog .name").text(name);
+
+                // 目前
                 // 更新 pill current
                 $(`button.pill[personID="${currentMsgOwner}"]`).attr(
                     "current",
                     currentMsgIndex
                 );
-
-                // 名字
-                $("#dialog .name").text(name);
-
-                // 目前
                 $("#dialog #current").text(currentMsgIndex);
 
                 // 總共
+                // 更新 pill total
+                $(`button.pill[personID="${currentMsgOwner}"]`).attr(
+                    "total",
+                    totalMsg.length
+                );
                 $("#dialog #total").text(totalMsg.length);
 
                 // 鈴聲
@@ -783,11 +796,22 @@ $(document).ready(function () {
                     $("#triggerMsgNext").removeClass("hide");
                 }
 
-                if (Number($("#dialog #current").text()) === 1) {
-                    $("#triggerMsgPrev").addClass("hide");
-                } else {
-                    $("#triggerMsgPrev").removeClass("hide");
-                }
+                // 歷史紀錄
+                $("#history").append(
+                    generateHistoryItem({
+                        who: name,
+                        msg: currentMsg.type === "image" ? currentMsg.imageSRC : currentMsg.text,
+                        type: currentMsg.type
+                    })
+                );
+
+                $(".room_history .wrapper").animate({ scrollTop: $(".room_history .wrapper").prop("scrollHeight") }, 500);
+
+                // if (Number($("#dialog #current").text()) === 1) {
+                //     $("#triggerMsgPrev").addClass("hide");
+                // } else {
+                //     $("#triggerMsgPrev").removeClass("hide");
+                // }
 
                 $("#dialog #goFind").text("");
 
@@ -796,46 +820,62 @@ $(document).ready(function () {
                     currentMsgId ===
                     msgGroupByRepeat[group].msgId + msgGroupByRepeat[group].repeat - 1
                 ) {
-                    if (group !== msgGroupByRepeat.length - 1) {
+                    // 如果是最後一組
+                    if (group === msgGroupByRepeat.length - 1) {
+                        $("#dialog #goFind").text(`已看完所有對話，快去作答區挑戰看看吧!`);
+                    } else {
                         maxMsgIndex = currentMsgId + msgGroupByRepeat[group + 1].repeat;
                         group++;
 
+                        // 如果當前只是該次最後一句，且非該人最後一句，就 +1 讓他下次回來看最新
+                        const currentOwnerTotalMsg = msgGroupByWho[currentMsgOwner].length
+                        if (currentMsgIndex < currentOwnerTotalMsg) {
+                            $(`button.pill[personID="${currentMsgOwner}"]`).attr(
+                                "current",
+                                currentMsgIndex + 1
+                            );
+                        }
+
                         // 在對話中新增下一個人是誰的提示
                         $("#dialog #goFind").text(
-                            `去找${member.filter(
+                            `${member.filter(
                                 (item) => item.id === Number(msgGroupByRepeat[group].who)
                             )[0].name
-                            }吧！`
+                            } >`
                         );
                         console.log(
                             member.filter(
                                 (item) => item.id === Number(msgGroupByRepeat[group].who)
                             )[0].name
                         );
-                    } else {
-
-                        $("#dialog #goFind").text(
-                            `已看完所有對話，快去作答區挑戰看看吧!`
-                        );
                     }
+                } else {
+                    // 因為預設已經是 1 ，所以最後才更新 currentMsgIndex，下次進來看
+                    // 不是最後一句就往下
+                    currentMsgIndex++;
                 }
+
+                // // 下次才更新
+                // if (currentMsgIndex < Number($("#dialog #total").text())) {
+
+                // }
             }
         }
 
-        // 往前
-        $("#triggerMsgPrev").on("click", function () {
-            if (currentMsgIndex > 1) {
-                currentMsgIndex--;
-            }
+        // 往前 目前不提供往前功能
+        // $("#triggerMsgPrev").on("click", function () {
+        //     if (currentMsgIndex > 1) {
+        //         currentMsgIndex--;
+        //     }
 
-            updateDialog();
-        });
+        //     updateDialog();
+        // });
 
         // 往前
         $("#triggerMsgNext").on("click", function () {
-            if (currentMsgIndex < Number($("#dialog #total").text())) {
-                currentMsgIndex++;
-            }
+            // if (currentMsgIndex < Number($("#dialog #total").text())) {
+            //     currentMsgIndex++;
+            // }
 
             updateDialog();
         });
@@ -870,11 +910,10 @@ $(document).ready(function () {
             activeQuestionItemFunction();
         }
 
-        $("#questionBtn").on("click", function () {
-            $(".room_question").addClass("active");
-        });
-        $("#closeQA").on("click", function () {
-            $(".room_question").removeClass("active");
+        $("#toggleBtn").on("click", function () {
+            $("#toggleBtn .icon").toggleClass("active")
+            $(".room_question").toggleClass("active");
+            $(".room_history").toggleClass("active");
         });
 
         $("#submitAnswer").click(() => {

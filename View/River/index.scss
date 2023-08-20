@@ -31,6 +31,23 @@ body {
     font-size: 16px;
     padding: 4px 16px;
   }
+
+  & #toggleBtn{
+    position: absolute;
+    top: 14px;
+    right: calc(30vw + 16px);
+
+    & .icon{
+      display: none;
+      width: 32px;
+      height: 32px;
+
+      &.active{
+        display: block;
+        cursor: pointer;
+      }
+    }
+  }
 }
 
 #room_bg {
@@ -46,17 +63,55 @@ body {
   }
 }
 
-.room_question {
+.room_history {
+  display: none;
   position: absolute;
   width: 30vw;
   top: 0;
   height: -webkit-fill-available;
   right: 0;
-  display: inline-flex;
   background-color: oldlace;
   box-sizing: border-box;
   transition: all 0.3s ease;
   z-index: 2;
+
+  &.active {
+    display: inline-flex;
+  }
+
+  .wrapper {
+    width: -webkit-fill-available;
+    padding: 14px 8px;
+    height: -webkit-fill-available;
+    overflow: overlay;
+
+    .blockTitle {
+      height: 46px;
+      color: var(--function);
+
+      @media screen and (max-width: 600px) {
+        display: flex;
+        justify-content: space-between;
+      }
+    }
+  }
+}
+
+.room_question {
+  display: none;
+  position: absolute;
+  width: 30vw;
+  top: 0;
+  height: -webkit-fill-available;
+  right: 0;
+  background-color: oldlace;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+  z-index: 2;
+
+  &.active {
+    display: inline-flex;
+  }
 
   .wrapper {
     width: -webkit-fill-available;
@@ -85,7 +140,6 @@ body {
           cursor: pointer;
         }
       }
-
     }
 
     .form__input {

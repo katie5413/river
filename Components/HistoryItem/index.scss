@@ -1,0 +1,22 @@
+.historyItem {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 12px;
+
+    .content_box {
+        display: flex;
+        flex-direction: column;
+
+        .name{
+            color: var(--function);
+        }
+
+        .text{
+            word-break: break-all;
+
+            img{
+                width: 100%;
+            }
+        }
+    }
+}
