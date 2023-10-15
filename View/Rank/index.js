@@ -6,7 +6,7 @@ $(document).ready(function () {
         return new Promise((resolve, reject) => {
             $.ajax({
                 type: 'GET',
-                url: `../Api/getRoomRank.php`,
+                url: `../../Api/getRoomRank.php`,
                 dataType: 'json',
                 success: function (rankData) {
                     rank = rankData;
@@ -80,6 +80,12 @@ $(document).ready(function () {
                     previous: '<img src="../../Images/icon/arrow-left.svg">',
                 },
             },
+            columnDefs: [
+                { width: '5%', targets: 0, orderable: false, searchable: false },
+                { width: '30%', targets: 2 },
+                { width: '30%', targets: 3 },
+            ],
+            order: [[4, 'desc']]
         });
 
         rankTable.columns.adjust().draw();

@@ -9,11 +9,11 @@ include "../../pdoInc.php";
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <link rel="stylesheet" type="text/css" href="../Common/index.css?v=<?php echo time(); ?>">
-    <link rel="stylesheet" type="text/css" href="../Dependencies/datatables/datatables.css?v=<?php echo time(); ?>" />
-    <link rel="stylesheet" type="text/css" href="../Components/TimeTunnel/index.css?v=<?php echo time(); ?>">
-    <link rel="stylesheet" type="text/css" href="../Components/Table/index.css?v=<?php echo time(); ?>">
-    <link rel="stylesheet" type="text/css" href="../Components/Loading/index.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" type="text/css" href="../../Common/index.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" type="text/css" href="../../Dependencies/datatables/datatables.css?v=<?php echo time(); ?>" />
+    <link rel="stylesheet" type="text/css" href="../../Components/TimeTunnel/index.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" type="text/css" href="../../Components/Table/index.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" type="text/css" href="../../Components/Loading/index.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" type="text/css" href="index.css?v=<?php echo time(); ?>">
     <!-- Google Tag Manager -->
     <script>
@@ -53,10 +53,9 @@ include "../../pdoInc.php";
 
     <div class="tab">
         <div class="sort">
-            <p>僅列出使用次數大於 1，並依</p>
-            <button class="sort-btn active" type="build-time">最新建立</button>
+            <button class="sort-btn" type="build-time">最新建立</button>
             <div class="bar"></div>
-            <button class="sort-btn" type="times">人氣</button>
+            <button class="sort-btn active" type="times">人氣</button>
             <p>排序</p>
         </div>
         <div class="table__container">
@@ -76,13 +75,13 @@ include "../../pdoInc.php";
     </div>
 
 
-    <script src="../Common/global.js?v=<?php echo time(); ?>"></script>
-    <script src="../Common/util.js?v=<?php echo time(); ?>"></script>
-    <script src="../Dependencies/jquery/jquery.min.js?v=<?php echo time(); ?>"></script>
-    <script src="../Dependencies/datatables/datatables.min.js?v=<?php echo time(); ?>"></script>
-    <script src="../Dependencies/datatables/dataTables.scrollResize.min.js"></script>
-    <script src="../Components/Table/index.js?v=<?php echo time(); ?>"></script>
-    <script src="../Components/Loading/index.js?v=<?php echo time(); ?>"></script>
+    <script src="../../Common/global.js?v=<?php echo time(); ?>"></script>
+    <script src="../../Common/util.js?v=<?php echo time(); ?>"></script>
+    <script src="../../Dependencies/jquery/jquery.min.js?v=<?php echo time(); ?>"></script>
+    <script src="../../Dependencies/datatables/datatables.min.js?v=<?php echo time(); ?>"></script>
+    <script src="../../Dependencies/datatables/dataTables.scrollResize.min.js"></script>
+    <script src="../../Components/Table/index.js?v=<?php echo time(); ?>"></script>
+    <script src="../../Components/Loading/index.js?v=<?php echo time(); ?>"></script>
     <script src="index.js?v=<?php echo time(); ?>"></script>
 </body>
 
